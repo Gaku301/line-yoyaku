@@ -64,6 +64,24 @@ class LineController extends Controller
             Log::debug('httpStatus: '.$response->getHTTPStatus().' body: '. $response->getRawBody());
         }
 
-        echo 'success';
+        echo 'Create success';
+    }
+
+    /**
+     * Unset rich menu
+     */
+    public function unsetRichMenu()
+    {
+        $htttpClient = new CurlHTTPClient(config('line.channel_access_token'));
+        $bot = new LINEBot($htttpClient, ['channelSecret' => config('line.channel_secret')]);
+
+        // Unset default rich menu
+        $response = $bot->cancelDefaultRichMenuId();
+        if ($response->isSucceeded()) {
+            Log::debug('Unset default rich menu Failed');
+            Log::debug('httpStatus: '.$response->getHTTPStatus().'body: '.$response->getRawBody());
+        }
+
+        echo 'Unset success';
     }
 }

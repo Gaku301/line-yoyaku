@@ -18,4 +18,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/create-rich-menu', [LineController::class, 'createRichMenu']);
+// LINE系
+Route::prefix('line')->controller(LineController::class)->group(function() {
+    Route::get('/create-rich-menu', 'createRichMenu');
+    Route::get('/unset-rich-menu', 'unsetRichMenu');
+});
