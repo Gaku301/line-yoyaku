@@ -37,6 +37,7 @@ class LineWebhookController extends Controller
             if (in_array($type, self::EVENT_TYPES)) {
                 // 対象のイベントタイプがある場合は処理を実行
                 $this->$type();
+                continue;
             }
         }
     }
