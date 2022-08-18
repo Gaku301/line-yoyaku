@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\LineBot;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,14 +14,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('friends', function (Blueprint $table) {
             $table->id();
+            $table->foreignIdFor(LineBot::class);
             $table->string('name', 32);
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->softDeletes();
-            $table->rememberToken();
+            $table->string('line_user_id', 64);
+            $table->string('line_display_name', 32);
+            $table->text('memo');
+            $table->string('line_icon_url', 128);
             $table->timestamps();
         });
     }
@@ -32,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('friends');
     }
 };

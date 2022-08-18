@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,14 +14,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('line_bots', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 32);
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->softDeletes();
-            $table->rememberToken();
+            $table->foreignIdFor(User::class);
+            $table->string('basic_id', 16);
+            $table->string('channel_id', 32);
+            $table->string('channel_access_token', 256);
+            $table->string('channel_secret', 64);
+            $table->string('liff_id', 32);
             $table->timestamps();
         });
     }
@@ -32,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('line_bots');
     }
 };
