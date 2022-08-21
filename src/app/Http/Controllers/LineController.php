@@ -43,7 +43,7 @@ class LineController extends Controller
         $response = $bot->createRichMenu($richMenuBuilder);
         if (!$response->isSucceeded()) {
             Log::debug('Create rich menu Failed');
-            Log::debug('httpStatus: '.$response->getHTTPStatus().' body: '. $response->getRawBody());
+            Log::debug('httpStatus: ' . $response->getHTTPStatus() . ' body: ' . $response->getRawBody());
         }
 
         // Upload rich menu image
@@ -54,14 +54,14 @@ class LineController extends Controller
         $response = $bot->uploadRichMenuImage($richMenuId, $imagePath, $contentType);
         if (!$response->isSucceeded()) {
             Log::debug('Upload rich menu image Failed');
-            Log::debug('httpStatus: '.$response->getHTTPStatus().' body: '. $response->getRawBody());
+            Log::debug('httpStatus: ' . $response->getHTTPStatus() . ' body: ' . $response->getRawBody());
         }
 
         // Set default rich menu
         $response = $bot->setDefaultRichMenuId($richMenuId);
         if (!$response->isSucceeded()) {
             Log::debug('Set default rich menu Failed');
-            Log::debug('httpStatus: '.$response->getHTTPStatus().' body: '. $response->getRawBody());
+            Log::debug('httpStatus: ' . $response->getHTTPStatus() . ' body: ' . $response->getRawBody());
         }
 
         echo 'Create success';
@@ -79,7 +79,7 @@ class LineController extends Controller
         $response = $bot->cancelDefaultRichMenuId();
         if ($response->isSucceeded()) {
             Log::debug('Unset default rich menu Failed');
-            Log::debug('httpStatus: '.$response->getHTTPStatus().'body: '.$response->getRawBody());
+            Log::debug('httpStatus: ' . $response->getHTTPStatus() . 'body: ' . $response->getRawBody());
         }
 
         echo 'Unset success';
