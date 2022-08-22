@@ -14,10 +14,13 @@ use Illuminate\Support\Facades\Log;
  */
 class AuthController extends Controller
 {
+    /**
+     * User sign up
+     */
     public function regist(Request $request)
     {
         $response = [
-            'statusCode' => 400,
+            'status' => 400,
             'result' => ['user' => []]
         ];
         try {
@@ -26,13 +29,48 @@ class AuthController extends Controller
             $user->password = Hash::make($request->password);
             $user->save();
 
-            Auth::login($user, true);
-            $response['statusCode'] = 200;
+            $response['status'] = 200;
             $response['result']['user'] = $user;
+            $response['result']['access_token'] = $user->createToken('auth_token')->plainTextToken;
         } catch (Exception $e) {
             Log::debug(__METHOD__ . 'Regist user failed');
             Log::debug($e->getMessage());
-            $response['statusCode'] = $e->getStatusCode();
+            $response['status'] = $e->getStatusCode();
+        }
+
+        return response()->json($response);
+    }
+
+    /**
+     * User sign in
+     */
+    public function login(Request $request)
+    {
+        $response = [
+            'status' => 400,
+            'result' => ['user' => []]
+        ];
+
+        try {
+            $credentials = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required'
+            ]);
+
+            // login処理
+            if (Auth::attempt($credentials)) {
+                $user = User::whereEmail($request->email)->first();
+                $request->session()->regenerate();
+                $response['status'] = 200;
+                $response['result']['user'] = $user;
+                $response['result']['access_token'] = $user->createToken('auth_token')->plainTextToken;
+            } else {
+                $response['status'] = 401;
+            }
+        } catch (Exception $e) {
+            Log::debug(__METHOD__ . 'Login failed');
+            Log::debug($e->getMessage());
+            $response['status'] = $e->getStatusCode();
         }
 
         return response()->json($response);

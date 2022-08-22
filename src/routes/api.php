@@ -16,9 +16,7 @@ use App\Http\Controllers\LineWebhookController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+
 
 // LINE系
 Route::prefix('line')->group(function() {
@@ -29,4 +27,10 @@ Route::prefix('line')->group(function() {
 // フロント側からのアクションはここに入る
 Route::prefix('v1')->group(function() {
     Route::post('/regist', [AuthController::class, 'regist']);
+    Route::post('/login', [AuthController::class, 'login']);
+    // ログイン後 アクセスできるエンドポイント
+    Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+        return $request->user();
+    });
+
 });
