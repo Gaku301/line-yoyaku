@@ -28,6 +28,7 @@ Route::prefix('line')->group(function() {
 Route::prefix('v1')->group(function() {
     Route::post('/regist', [AuthController::class, 'regist']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/logout', [AuthController::class , 'logout']);
     // ログイン後 アクセスできるエンドポイント
     Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
         return $request->user();
