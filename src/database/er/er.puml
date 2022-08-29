@@ -37,6 +37,7 @@ entity Friend {
     line_display_name
     memo
     line_icon_url
+    is_blocked
     created_at
     updated_at
 }

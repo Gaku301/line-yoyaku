@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Friend;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use LINE\LINEBot;
 use LINE\LINEBot\HTTPClient\CurlHTTPClient;
 use LINE\LINEBot\RichMenuBuilder;
@@ -16,14 +16,31 @@ use LINE\LINEBot\TemplateActionBuilder\MessageTemplateActionBuilder;
 
 class LineController extends Controller
 {
+    /** @var CurlHTTPClient */
+    private $htttpClient;
+    /** @var LINEBot */
+    private $bot;
+
+    /**
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            // LINEBotの初期化処理
+            $this->htttpClient = new CurlHTTPClient(config('line.channel_access_token'));
+            $this->bot = new LINEBot($this->htttpClient, ['channelSecret' => config('line.channel_secret')]);
+
+            return $next($request);
+        });
+    }
+
     /**
      * Create rich menu for LINE Messaging API
+     * ・リッチメニューを作成する
      */
     public function createRichMenu()
     {
-        $htttpClient = new CurlHTTPClient(config('line.channel_access_token'));
-        $bot = new LINEBot($htttpClient, ['channelSecret' => config('line.channel_secret')]);
-
         // Create rich menu
         $richMenuSizeBuilder = new RichMenuSizeBuilder(470, 1200);
         $richMenuAreaBuilder = [];
@@ -40,7 +57,7 @@ class LineController extends Controller
         $cardTemplateActionBuilder = new MessageTemplateActionBuilder('card', 'カードを表示する');
         $richMenuAreaBuilder[] = new RichMenuAreaBuilder($cardRichMenuAreaBoundsBuilder, $cardTemplateActionBuilder);
         $richMenuBuilder = new RichMenuBuilder($richMenuSizeBuilder, false, 'default', 'メニュー', $richMenuAreaBuilder);
-        $response = $bot->createRichMenu($richMenuBuilder);
+        $response = $this->bot->createRichMenu($richMenuBuilder);
         if (!$response->isSucceeded()) {
             Log::debug('Create rich menu Failed');
             Log::debug('httpStatus: ' . $response->getHTTPStatus() . ' body: ' . $response->getRawBody());
@@ -51,14 +68,14 @@ class LineController extends Controller
         $imagePath = 'storage/default.png'; // フルパスではなくimageのパスのみを指定
         $contentType = 'image/png';
         $richMenuId = $response->getJSONDecodedBody()['richMenuId'];
-        $response = $bot->uploadRichMenuImage($richMenuId, $imagePath, $contentType);
+        $response = $this->bot->uploadRichMenuImage($richMenuId, $imagePath, $contentType);
         if (!$response->isSucceeded()) {
             Log::debug('Upload rich menu image Failed');
             Log::debug('httpStatus: ' . $response->getHTTPStatus() . ' body: ' . $response->getRawBody());
         }
 
         // Set default rich menu
-        $response = $bot->setDefaultRichMenuId($richMenuId);
+        $response = $this->bot->setDefaultRichMenuId($richMenuId);
         if (!$response->isSucceeded()) {
             Log::debug('Set default rich menu Failed');
             Log::debug('httpStatus: ' . $response->getHTTPStatus() . ' body: ' . $response->getRawBody());
@@ -69,19 +86,43 @@ class LineController extends Controller
 
     /**
      * Unset rich menu
+     * ・作成したリッチメニューを非表示にする
      */
     public function unsetRichMenu()
     {
-        $htttpClient = new CurlHTTPClient(config('line.channel_access_token'));
-        $bot = new LINEBot($htttpClient, ['channelSecret' => config('line.channel_secret')]);
-
         // Unset default rich menu
-        $response = $bot->cancelDefaultRichMenuId();
+        $response = $this->bot->cancelDefaultRichMenuId();
         if ($response->isSucceeded()) {
             Log::debug('Unset default rich menu Failed');
             Log::debug('httpStatus: ' . $response->getHTTPStatus() . 'body: ' . $response->getRawBody());
         }
 
         echo 'Unset success';
+    }
+
+    /**
+     * Get LINE friends
+     * ・公式LINEアカウントから友達情報を取得する
+     */
+    public function friends(Request $request)
+    {
+        try {
+            $line_bot_id = '';
+            $friends = Friend::where('line_bot_id', $line_bot_id)->get();
+
+            $response = [
+                'status' => 200,
+                'result' => ['friends' => $friends]
+            ];
+        } catch (Exception $e) {
+            Log::debug(__METHOD__ . 'Get LINE friends failed');
+            Log::debug($e->getMessage());
+            $response = [
+                'status' => $e->getStatusCode(),
+                'result' => ['friends' => []]
+            ];
+        }
+
+        return response()->json($response);
     }
 }

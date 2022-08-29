@@ -29,7 +29,6 @@ class AuthController extends Controller
                 'status' => 200,
                 'reuslt' => ['user'=> $user]
             ];
-            // $response['result']['access_token'] = $user->createToken('auth_token')->plainTextToken;
         } catch (Exception $e) {
             Log::debug(__METHOD__ . 'Regist user failed');
             Log::debug($e->getMessage());

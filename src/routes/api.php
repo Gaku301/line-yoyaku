@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LineController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LineWebhookController;
@@ -30,8 +31,10 @@ Route::prefix('v1')->group(function() {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class , 'logout']);
     // ログイン後 アクセスできるエンドポイント
-    Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-        return $request->user();
+    Route::middleware('auth:sanctum')->group(function() {
+        Route::get('/user', function (Request $request) {
+            return $request->user();
+        });
+        Route::get('line/friends', [LineController::class, 'friends']);
     });
-
 });

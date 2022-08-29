@@ -17,11 +17,12 @@ return new class extends Migration
         Schema::create('friends', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(LineBot::class);
-            $table->string('name', 32);
+            $table->string('name', 32)->nullable();
             $table->string('line_user_id', 64);
             $table->string('line_display_name', 32);
-            $table->text('memo');
-            $table->string('line_icon_url', 128);
+            $table->text('memo')->nullable();
+            $table->string('line_icon_url', 128)->nullable();
+            $table->boolean('is_blocked')->default(false);
             $table->timestamps();
         });
     }
