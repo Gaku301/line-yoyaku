@@ -55,10 +55,11 @@ class AuthController extends Controller
             // login処理
             if (Auth::attempt($credentials)) {
                 $user = User::whereEmail($request->email)->first();
+                Auth::login($user);
                 $request->session()->regenerate();
                 $response = [
                     'status' => 200,
-                    'result' => ['user' => Auth::login($user)]
+                    'result' => ['user' => $user]
                 ];
             } else {
                 $response['status'] = 401;

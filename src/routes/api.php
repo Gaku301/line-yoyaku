@@ -5,6 +5,7 @@ use App\Http\Controllers\LineController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LineWebhookController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +36,7 @@ Route::prefix('v1')->group(function() {
         Route::get('/user', function (Request $request) {
             return $request->user();
         });
-        Route::get('line/friends', [LineController::class, 'friends']);
+        Route::get('/line/friends', [LineController::class, 'friends']);
+        Route::post('/user/settings', [UserController::class, 'settings']);
     });
 });

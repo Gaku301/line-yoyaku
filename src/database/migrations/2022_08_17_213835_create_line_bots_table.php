@@ -17,11 +17,11 @@ return new class extends Migration
         Schema::create('line_bots', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class);
-            $table->string('basic_id', 16);
-            $table->string('channel_id', 32);
+            $table->string('basic_id', 16)->nullable();
+            $table->string('channel_id', 32)->nullable();
             $table->string('channel_access_token', 256);
             $table->string('channel_secret', 64);
-            $table->string('liff_id', 32);
+            $table->string('liff_id', 32)->nullable();
             $table->timestamps();
         });
     }
