@@ -36,7 +36,9 @@ Route::prefix('v1')->group(function() {
         Route::get('/user', function (Request $request) {
             return $request->user();
         });
-        Route::get('/line/friends', [LineController::class, 'friends']);
+        Route::post('/line/friends', [LineController::class, 'friends']);
+        Route::post('/line/get-followers', [LineController::class, 'getFollowers']);
         Route::post('/user/settings', [UserController::class, 'settings']);
+        Route::post('/user/create-line-bot', [UserController::class, 'createLineBot']);
     });
 });

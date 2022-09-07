@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Friend;
+use App\Models\LineBot as ModelsLineBot;
+use App\Models\User;
+use Error;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 use LINE\LINEBot;
 use LINE\LINEBot\HTTPClient\CurlHTTPClient;
 use LINE\LINEBot\RichMenuBuilder;
@@ -27,10 +31,16 @@ class LineController extends Controller
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-            // LINEBotの初期化処理
-            $this->htttpClient = new CurlHTTPClient(config('line.channel_access_token'));
-            $this->bot = new LINEBot($this->htttpClient, ['channelSecret' => config('line.channel_secret')]);
+            // lineBotを取得
+            $lineBot = ModelsLineBot::find($request->lineBotId);
+            if (empty($lineBot)) {
+                // なければ即次の処理へ
+                return $next($request);
+            }
 
+            // LINEBotの初期化処理
+            $this->htttpClient = new CurlHTTPClient($lineBot->channel_access_token);
+            $this->bot = new LINEBot($this->htttpClient, ['channelSecret' => $lineBot->channel_secret]);
             return $next($request);
         });
     }
@@ -107,7 +117,8 @@ class LineController extends Controller
     public function friends(Request $request)
     {
         try {
-            $line_bot_id = '';
+            $user = User::find($request->user_id);
+            $line_bot_id = $user->lineBot->id;
             $friends = Friend::where('line_bot_id', $line_bot_id)->get();
 
             $response = [
@@ -124,5 +135,23 @@ class LineController extends Controller
         }
 
         return response()->json($response);
+    }
+
+    public function getFollowers(Request $request)
+    {
+        try {
+            $response = $this->bot->getFollowerIds();
+            if (!$response->isSucceeded()) {
+                throw new Error();
+            }
+        } catch (Exception $e) {
+            Log::debug(__METHOD__ . 'Get followers from line failed');
+            Log::debug($e->getMessage());
+            $response = [
+                'status' => $e->getStatusCode(),
+                'result' => false
+            ];
+
+        }
     }
 }

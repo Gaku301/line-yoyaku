@@ -45,4 +45,34 @@ class UserController extends Controller
 
         return response()->json($response);
     }
+
+    /**
+     * Create LineBot
+     * ・新規ユーザーのLineBotを作成する
+     */
+    public function createLineBot(Request $request)
+    {
+        try {
+            $user = User::find($request->user_id);
+            // 新規登録
+            $lineBot = new LineBot();
+            $lineBot->fill($request->except('user_id'));
+            $lineBot->user_id = $user->id;
+            $lineBot->save();
+
+            $response = [
+                'status' => 200,
+                'result' => ['lineBot' => $lineBot]
+            ];
+        } catch (Exception $e) {
+            Log::debug(__METHOD__ . 'Save settings failed');
+            Log::debug($e->getMessage());
+            $response = [
+                'status' => $e->getStatusCode(),
+                'result' => false
+            ];
+        }
+
+        return response()->json($response);
+    }
 }
